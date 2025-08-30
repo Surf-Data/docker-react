@@ -3,8 +3,8 @@ WORKDIR '/app'
 
 COPY package.json ./
 RUN npm install
-
-#COPY . . #Mounting volumes in docker compose
+#Mounting volumes in docker compose
+COPY . . 
 ENV WATCHPACK_POLLING=true
 ENV CHOKIDAR_USEPOLLING=true
 CMD ["npm","start"]
