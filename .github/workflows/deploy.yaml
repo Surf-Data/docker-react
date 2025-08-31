@@ -5,17 +5,27 @@ on:
       - main
 
 jobs:
-  build:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Build and run tests using Dockerfile.dev
+      - run: docker build -t surfdatasolutions/react-test -f Dockerfile.dev .
+      - run: docker run -e CI=true surfdatasolutions/react-test npm test
+
+  deploy:
+    needs: test  # This ensures deploy only runs if tests pass
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t surfdatasolutions/react-test -f Dockerfile.dev .
-      - run: docker run -e CI=true surfdatasolutions/react-test npm test
-
+      
+      # Build production image using main Dockerfile
+      - run: docker build -t surfdatasolutions/react-prod .
+      
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
-      
 
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v18
